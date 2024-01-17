@@ -1,0 +1,10 @@
+AllowedDomains:
+  - igamesofficial.com
+  - immomo.com
+  - wemomo.com
+  - immomogame.com
+  - hellogroup.com
+# 并发数
+Parallelism: 0
+# 当设置并发数时，随机等待时间生效，该配置表示每两个请求间的最大请求时间是5秒
+RandomDelayMaxTime: 5
