@@ -32,6 +32,15 @@ func isSubdomainOfAllowedDomain(host string, allowedDomains map[string]struct{})
 	return false
 }
 
+func isExcludedDomain(host string, excludedDomains map[string]struct{}) bool {
+	for domain := range excludedDomains {
+		if host == domain {
+			return true
+		}
+	}
+	return false
+}
+
 func createCsvWriter() (*csv.Writer, *os.File, error) {
 	csvFile, err := os.OpenFile(out, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
@@ -96,6 +105,9 @@ func runSpider(detailsCh chan *PageDetail) error {
 	})
 
 	c.OnRequest(func(r *colly.Request) {
+		if isExcludedDomain(r.URL.Hostname(), excludeDomains) {
+			r.Abort()
+		}
 		if !isSubdomainOfAllowedDomain(r.URL.Hostname(), allowedDomains) {
 			r.Abort()
 		} else {
@@ -121,6 +133,7 @@ func runSpider(detailsCh chan *PageDetail) error {
 }
 
 var allowedDomains map[string]struct{}
+var excludeDomains map[string]struct{}
 var visitURL string
 var out string
 var parallelism int
@@ -140,10 +153,16 @@ func init() {
 
 	randomDelayMaxTime = viper.GetInt("RandomDelayMaxTime")
 	parallelism = viper.GetInt("Parallelism")
-	domains := viper.GetStringSlice("AllowedDomains")
+	allowdomains := viper.GetStringSlice("AllowedDomains")
+	excludedomains := viper.GetStringSlice("ExcludedDomains")
 	allowedDomains = make(map[string]struct{})
-	for _, d := range domains {
+	for _, d := range allowdomains {
 		allowedDomains[d] = struct{}{}
+	}
+
+	excludeDomains = make(map[string]struct{})
+	for _, d := range excludedomains {
+		excludeDomains[d] = struct{}{}
 	}
 }
 
