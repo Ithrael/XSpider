@@ -115,6 +115,11 @@ func runSpider(detailsCh chan *PageDetail) {
 			r.Abort()
 		} else {
 			log.Println("Visiting", r.URL)
+			if len(headers) > 0 {
+				for key, value := range headers {
+					r.Headers.Set(key, value)
+				}
+			}
 		}
 	})
 
@@ -140,6 +145,7 @@ var visitURL string
 var out string
 var parallelism int
 var randomDelayMaxTime int
+var headers map[string]string
 
 func init() {
 	flag.StringVar(&visitURL, "url", "https://www.baidu.com", "URL to visit")
@@ -157,6 +163,7 @@ func init() {
 	parallelism = viper.GetInt("Parallelism")
 	allowdomains := viper.GetStringSlice("AllowedDomains")
 	excludedomains := viper.GetStringSlice("ExcludedDomains")
+	headers = viper.GetStringMapString("Headers")
 	allowedDomains = make(map[string]struct{})
 	for _, d := range allowdomains {
 		allowedDomains[d] = struct{}{}
