@@ -6,6 +6,7 @@ import (
 	"encoding/csv"
 	"flag"
 	"fmt"
+	"log"
 	"os"
 	"strings"
 	"time"
@@ -51,23 +52,25 @@ func createCsvWriter() (*csv.Writer, *os.File, error) {
 	return writer, csvFile, nil
 }
 
-func writeDetailsToCSV(detailsCh chan *PageDetail) error {
+func writeDetailsToCSV(detailsCh chan *PageDetail) {
 	writer, f, err := createCsvWriter()
 	if err != nil {
-		return err
+		log.Fatalf("Failed to create CSV writer: %v", err)
 	}
 	defer f.Close()
 	defer writer.Flush()
 
 	for detail := range detailsCh {
-		writer.Write([]string{
+		err := writer.Write([]string{
 			detail.Url,
 			detail.Title,
 			fmt.Sprint(detail.ResponseCode),
 			detail.Fingerprint,
 		})
+		if err != nil {
+			log.Printf("Failed to write data to CSV: %v", err)
+		}
 	}
-	return nil
 }
 
 func parseResp(resp *colly.Response, url string) (*PageDetail, error) {
@@ -93,7 +96,7 @@ func parseResp(resp *colly.Response, url string) (*PageDetail, error) {
 	}, nil
 }
 
-func runSpider(detailsCh chan *PageDetail) error {
+func runSpider(detailsCh chan *PageDetail) {
 	c := colly.NewCollector()
 
 	if parallelism != 0 {
@@ -111,14 +114,14 @@ func runSpider(detailsCh chan *PageDetail) error {
 		if !isSubdomainOfAllowedDomain(r.URL.Hostname(), allowedDomains) {
 			r.Abort()
 		} else {
-			fmt.Println("Visiting", r.URL)
+			log.Println("Visiting", r.URL)
 		}
 	})
 
 	c.OnResponse(func(r *colly.Response) {
 		pageDetail, err := parseResp(r, r.Request.URL.String())
 		if err != nil {
-			fmt.Println(err)
+			log.Printf("Failed to parse response: %v", err)
 			return
 		}
 
@@ -126,10 +129,9 @@ func runSpider(detailsCh chan *PageDetail) error {
 	})
 
 	if err := c.Visit(visitURL); err != nil {
-		return fmt.Errorf("visit url failed: %v", err)
+		log.Fatalf("Visit URL failed: %v", err)
 	}
 	close(detailsCh)
-	return nil
 }
 
 var allowedDomains map[string]struct{}
@@ -148,7 +150,7 @@ func init() {
 	viper.AddConfigPath(".")
 	err := viper.ReadInConfig()
 	if err != nil {
-		panic(fmt.Errorf("fatal error config file: %s", err))
+		log.Fatalf("Fatal error config file: %s", err)
 	}
 
 	randomDelayMaxTime = viper.GetInt("RandomDelayMaxTime")
@@ -169,7 +171,5 @@ func init() {
 func main() {
 	detailsCh := make(chan *PageDetail)
 	go writeDetailsToCSV(detailsCh)
-	if err := runSpider(detailsCh); err != nil {
-		panic(err)
-	}
+	runSpider(detailsCh)
 }
