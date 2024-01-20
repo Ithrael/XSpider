@@ -1,12 +1,20 @@
-AllowedDomains:
-  - apple.com.cn
-  - apple.com
-ExcludedDomains:
-  - music.apple.com
-# 并发数
-Parallelism: 0
-# 当设置并发数时，随机等待时间生效，该配置表示每两个请求间的最大请求时间是5秒
-RandomDelayMaxTime: 5
-
 Headers:
   User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36
+
+Restriction:
+  MaxDepth: 0    # 最大采集深度,0表示不限制
+  MaxCount: 0    # 最大采集的连接数
+  AllowedDomains: # 允许爬取的host
+    - apple.com.cn
+    - apple.com
+  ExcludedDomains: # 不允许爬取的host
+    - music.apple.com
+  AllowedPaths: [] # 允许访问的路径，支持的格式如: test、*test*
+  ExcludedPaths: [] # 不允许访问的路径，支持的格式如: test、*test*
+  AllowedQueryKey: [] # 允许访问的query key，支持的格式如: test、*test*
+  ExcludedQueryKey: [] # 不允许访问的query key，支持的格式如: test、*test*
+
+  # 并发数，默认为0，没有限制
+  Parallelism: 0
+  # 当设置并发数时，随机等待时间生效，该配置表示每两个请求间的最大请求时间是5秒
+  RandomDelayMaxTime: 5
