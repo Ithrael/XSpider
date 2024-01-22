@@ -1,20 +1,21 @@
 Headers:
   User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36
+  Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8
+  Cookie: test
 
 Restriction:
-  MaxDepth: 0    # 最大采集深度,0表示不限制
-  MaxCount: 0    # 最大采集的连接数
-  AllowedDomains: # 允许爬取的host
-    - apple.com.cn
-    - apple.com
-  ExcludedDomains: # 不允许爬取的host
-    - music.apple.com
-  AllowedPaths: [] # 允许访问的路径，支持的格式如: test、*test*
-  ExcludedPaths: [] # 不允许访问的路径，支持的格式如: test、*test*
-  AllowedQueryKey: [] # 允许访问的query key，支持的格式如: test、*test*
-  ExcludedQueryKey: [] # 不允许访问的query key，支持的格式如: test、*test*
-
-  # 并发数，默认为0，没有限制
-  Parallelism: 0
-  # 当设置并发数时，随机等待时间生效，该配置表示每两个请求间的最大请求时间是5秒
+  MaxDepth: 0    # 设置最大采集深度，0代表无深度限制 
+  MaxCount: 0    # 设置最大采集链接数，0代表无链接数限制
+  AllowedDomains: # 设置允许爬取的域名列表，支持通配符格式，例如: *.apple.com
+    - *.apple.com.cn
+    - *.apple.com
+  ExcludedDomains: # 设置禁止爬取的域名列表，支持通配符格式，例如: *.music.apple.com
+    - *.music.apple.com
+  AllowedPaths: [] # 设置允许访问的路径列表，支持通配符格式，例如: test、*test*
+  ExcludedPaths: [] # 设置禁止访问的路径列表，支持通配符格式，例如: test、*test*
+  AllowedQueryKey: [] # 设置允许访问的查询键列表，支持通配符格式，例如:test、*test*
+  ExcludedQueryKey: [] # 设置禁止访问的查询键列表，支持通配符格式，例如:test、*test*
+  # 设置并发数， 默认为0，代表没有限制
+  Parallelism: 0  
+  # 当设定并发数时，最大随机等待时间生效，该配置表示每两个请求间的最大请求时间是5秒
   RandomDelayMaxTime: 5
