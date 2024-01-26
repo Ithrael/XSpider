@@ -6,11 +6,11 @@ Headers:
 Restriction:
   MaxDepth: 0    # 设置最大采集深度，0代表无深度限制 
   MaxCount: 0    # 设置最大采集链接数，0代表无链接数限制
-  AllowedDomains: # 设置允许爬取的域名列表，支持通配符格式，例如: *.apple.com
-    - *.apple.com.cn
-    - *.apple.com
-  ExcludedDomains: # 设置禁止爬取的域名列表，支持通配符格式，例如: *.music.apple.com
-    - *.music.apple.com
+  AllowedDomains: # 设置允许爬取的域名列表
+    - "apple.com.cn"
+    - "apple.com"
+  ExcludedDomains: # 设置禁止爬取的域名列表
+    - "music.apple.com"
   AllowedPaths: [] # 设置允许访问的路径列表，支持通配符格式，例如: test、*test*
   ExcludedPaths: [] # 设置禁止访问的路径列表，支持通配符格式，例如: test、*test*
   AllowedQueryKey: [] # 设置允许访问的查询键列表，支持通配符格式，例如:test、*test*

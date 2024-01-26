@@ -11,6 +11,7 @@ import (
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/gocolly/colly"
+	"github.com/gocolly/colly/debug"
 )
 
 type PageDetail struct {
@@ -25,7 +26,7 @@ var visitURL string
 var out string
 var config *Config
 
-func init() {
+func initConfig() {
 	flag.StringVar(&visitURL, "url", "https://www.baidu.com", "URL to visit")
 	flag.StringVar(&out, "out", "out.csv", "out file name")
 	flag.Parse()
@@ -62,7 +63,8 @@ func parseResp(resp *colly.Response, url string) (*PageDetail, error) {
 func runSpider(detailsCh chan *PageDetail) {
 	var count int
 	c := colly.NewCollector(
-		colly.MaxDepth(config.Restriction.MaxDepth),
+		// colly.MaxDepth(config.Restriction.MaxDepth),
+		colly.Debugger(&debug.LogDebugger{}),
 	)
 
 	if config.Restriction.Parallelism != 0 {
@@ -84,28 +86,31 @@ func runSpider(detailsCh chan *PageDetail) {
 		host := r.URL.Host
 		path := r.URL.Path
 		queryKey := r.URL.RawQuery
-
-		if !IsMatch(host, config.Restriction.AllowedDomains) {
+		fmt.Println(host)
+		fmt.Println(path)
+		fmt.Println(queryKey)
+		if !IsSubDomain(host, config.Restriction.AllowedDomains) {
 			r.Abort()
 		}
-		if IsMatch(host, config.Restriction.ExcludedDomains) {
+		if IsSubDomain(host, config.Restriction.ExcludedDomains) {
 			r.Abort()
 		}
-
-		if !IsMatch(path, config.Restriction.AllowedPaths) {
-			r.Abort()
-		}
-		if IsMatch(path, config.Restriction.ExcludedPaths) {
-			r.Abort()
-		}
-
-		if !IsMatch(queryKey, config.Restriction.AllowedQueryKey) {
-			r.Abort()
-		}
-		if IsMatch(queryKey, config.Restriction.ExcludedQueryKey) {
-			r.Abort()
-		}
-
+		// fmt.Println(3)
+		// if !IsMatch(path, config.Restriction.AllowedPaths) {
+		// 	r.Abort()
+		// }
+		// fmt.Println(4)
+		// if IsMatch(path, config.Restriction.ExcludedPaths) {
+		// 	r.Abort()
+		// }
+		// fmt.Println(5)
+		// if !IsMatch(queryKey, config.Restriction.AllowedQueryKey) {
+		// 	r.Abort()
+		// }
+		// fmt.Println(6)
+		// if IsMatch(queryKey, config.Restriction.ExcludedQueryKey) {
+		// 	r.Abort()
+		// }
 		log.Println("Visiting", r.URL)
 		count++
 		if len(config.Headers) > 0 {
@@ -124,7 +129,6 @@ func runSpider(detailsCh chan *PageDetail) {
 
 		detailsCh <- pageDetail
 	})
-
 	if err := c.Visit(visitURL); err != nil {
 		log.Fatalf("Visit URL failed: %v", err)
 	}
@@ -132,6 +136,7 @@ func runSpider(detailsCh chan *PageDetail) {
 }
 
 func main() {
+	initConfig()
 	detailsCh := make(chan *PageDetail)
 	go WriteDetailsToCSV(detailsCh)
 	runSpider(detailsCh)

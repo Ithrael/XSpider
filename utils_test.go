@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func TestIsMatch(t *testing.T) {
+func TestIsRegexMatch(t *testing.T) {
 	tests := []struct {
 		name       string
 		matchStr   string
@@ -14,7 +14,7 @@ func TestIsMatch(t *testing.T) {
 		{
 			name:       "test case 1 - Domain match test with single pattern",
 			matchStr:   "apple.com",
-			patternArr: []string{"*.apple.com.cn", "*.apple.com"},
+			patternArr: []string{"apple.com.cn", "apple.com"},
 			want:       true,
 		},
 		{
@@ -69,8 +69,44 @@ func TestIsMatch(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := IsMatch(tt.matchStr, tt.patternArr); got != tt.want {
-				t.Errorf("IsMatch() = %v, want %v", got, tt.want)
+			if got := IsRegexMatch(tt.matchStr, tt.patternArr); got != tt.want {
+				t.Errorf("IsRegexMatch() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestIsSubDomain(t *testing.T) {
+	tests := []struct {
+		name       string
+		matchStr   string
+		patternArr []string
+		want       bool
+	}{
+		{
+			name:       "test case 1 - Domain match test with single pattern",
+			matchStr:   "apple.com",
+			patternArr: []string{"apple.com.cn", "apple.com"},
+			want:       true,
+		},
+		{
+			name:       "test case 2 - Domain match test with multiple patterns",
+			matchStr:   "test.apple.com.cn",
+			patternArr: []string{"apple.com.cn", "apple.com"},
+			want:       true,
+		},
+		{
+			name:       "test case 3 - Domain match failure test",
+			matchStr:   "testapple.com.cn",
+			patternArr: []string{"apple.com.cn", "apple.com"},
+			want:       false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := IsSubDomain(tt.matchStr, tt.patternArr); got != tt.want {
+				t.Errorf("IsSubDomain() = %v, want %v", got, tt.want)
 			}
 		})
 	}
