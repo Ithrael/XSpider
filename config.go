@@ -20,13 +20,19 @@ type Config struct {
 		Parallelism        int      `mapstructure:"Parallelism"`
 		RandomDelayMaxTime int      `mapstructure:"RandomDelayMaxTime"`
 	} `mapstructure:"Restriction"`
+	Out struct {
+		Mysql struct {
+			Enable bool   `mapstructure:"Enable"`
+			Url    string `mapstructure:"Url"`
+		} `mapstructure:"Mysql"`
+	}
 }
 
 // Function to load the configuration from the YAML file
-func LoadConfig() (*Config, error) {
+func LoadConfig(configFile string) (*Config, error) {
 	var config Config
 	viper.SetConfigType("yaml")
-	viper.SetConfigFile("./config.yaml")
+	viper.SetConfigFile(configFile)
 	err := viper.ReadInConfig()
 	if err != nil {
 		log.Fatalf("Fatal error config file: %s", err)

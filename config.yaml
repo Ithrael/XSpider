@@ -19,3 +19,8 @@ Restriction:
   Parallelism: 0  
   # 当设定并发数时，最大随机等待时间生效，该配置表示每两个请求间的最大请求时间是5秒
   RandomDelayMaxTime: 5
+
+Out:
+  Mysql:
+    Enable: False
+    Url: username:password@tcp(localhost:3306)/dbname

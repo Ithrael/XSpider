@@ -25,13 +25,15 @@ type PageDetail struct {
 var visitURL string
 var out string
 var config *Config
+var configFile string
 
 func initConfig() {
 	flag.StringVar(&visitURL, "url", "https://www.baidu.com", "URL to visit")
 	flag.StringVar(&out, "out", "out.csv", "out file name")
+	flag.StringVar(&configFile, "config", "./config.yaml", "config file path")
 	flag.Parse()
 
-	config, _ = LoadConfig()
+	config, _ = LoadConfig(configFile)
 	if config == nil {
 		return
 	}

@@ -1,0 +1,27 @@
+Headers:
+  User-Agent: TestUserAgent
+  Accept: test/accept
+  Cookie: test
+
+Restriction:
+  MaxDepth: 1
+  MaxCount: 1
+  AllowedDomains:
+    - "example.com"
+  ExcludedDomains:
+    - "excluded.com"
+  AllowedPaths:
+    - "/allowed"
+  ExcludedPaths:
+    - "/excluded"
+  AllowedQueryKey:
+    - "key1"
+  ExcludedQueryKey:
+    - "key2"
+  Parallelism: 1
+  RandomDelayMaxTime: 1
+
+Out:
+  Mysql:
+    Enable: false
+    Url: test_username:test_password@tcp(test_dbhost:3306)/test_dbname
