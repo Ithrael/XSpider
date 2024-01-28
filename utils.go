@@ -4,9 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	"os/exec"
 	"regexp"
-	"runtime"
 	"strings"
 )
 
@@ -56,19 +54,6 @@ func ReadUrlsFromFile(filename string) ([]string, error) {
 	}
 
 	return urls, nil
-}
-
-func ClearScreen() {
-	switch runtime.GOOS {
-	case "linux", "darwin":
-		cmd := exec.Command("clear")
-		cmd.Stdout = os.Stdout
-		cmd.Run()
-	case "windows":
-		cmd := exec.Command("cmd", "/c", "cls")
-		cmd.Stdout = os.Stdout
-		cmd.Run()
-	}
 }
 
 func ShowLogo() {
