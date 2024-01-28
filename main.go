@@ -122,9 +122,10 @@ func runSpider(detailsCh chan *middleware.PageDetail) {
 	c.OnResponse(func(r *colly.Response) {
 		pageDetail, err := parseResp(r, r.Request.URL)
 		if err != nil {
-			log.Fatal("Failed to parse response: %v", err)
+			log.Printf("Failed to parse response: %v", err)
 			return
 		}
+
 		detailsCh <- pageDetail
 	})
 
@@ -135,7 +136,7 @@ func runSpider(detailsCh chan *middleware.PageDetail) {
 	if visitFile != "" {
 		urlsFromFile, err := ReadUrlsFromFile(visitFile)
 		if err != nil {
-			log.Fatal("ReadUrlsFromFile Error: %v", err)
+			log.Printf("ReadUrlsFromFile Error: %v", err)
 			return
 		}
 
