@@ -152,6 +152,8 @@ func runSpider(detailsCh chan *middleware.PageDetail) {
 
 func main() {
 	initConfig()
+	ClearScreen()
+	ShowLogo()
 	detailsCh := make(chan *middleware.PageDetail)
 	// 将数据写入到csv文件(output.csv)中
 	go middleware.GetCsvInstance().Process(detailsCh)

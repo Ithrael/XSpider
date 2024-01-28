@@ -4,7 +4,9 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"os/exec"
 	"regexp"
+	"runtime"
 	"strings"
 )
 
@@ -54,4 +56,31 @@ func ReadUrlsFromFile(filename string) ([]string, error) {
 	}
 
 	return urls, nil
+}
+
+func ClearScreen() {
+	switch runtime.GOOS {
+	case "linux", "darwin":
+		cmd := exec.Command("clear")
+		cmd.Stdout = os.Stdout
+		cmd.Run()
+	case "windows":
+		cmd := exec.Command("cmd", "/c", "cls")
+		cmd.Stdout = os.Stdout
+		cmd.Run()
+	}
+}
+
+func ShowLogo() {
+	fmt.Println("\033[32m") // 设置文本颜色为绿色
+
+	logo := `
+	__  __     ______     ______   __     _____     ______     ______    
+	/\_\_\_\   /\  ___\   /\  == \ /\ \   /\  __-.  /\  ___\   /\  == \   
+	\/_/\_\/_  \ \___  \  \ \  _-/ \ \ \  \ \ \/\ \ \ \  __\   \ \  __<   
+	  /\_\/\_\  \/\_____\  \ \_\    \ \_\  \ \____-  \ \_____\  \ \_\ \_\ 
+	  \/_/\/_/   \/_____/   \/_/     \/_/   \/____/   \/_____/   \/_/ /_/ 																		
+`
+	fmt.Print(logo)
+	fmt.Println("\033[0m") // 恢复文本颜色
 }
