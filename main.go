@@ -12,7 +12,7 @@ import (
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/gocolly/colly"
-	"github.com/ithrael/WebScan/middleware"
+	"github.com/ithrael/XSpider/middleware"
 )
 
 var visitURL string

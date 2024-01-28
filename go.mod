@@ -1,4 +1,4 @@
-module github.com/ithrael/WebScan
+module github.com/ithrael/XSpider
 
 go 1.21.5
 
