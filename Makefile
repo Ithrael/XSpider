@@ -1,4 +1,4 @@
-.PHONY: all build run gotool clean help
+.PHONY: all build run gotool run_tests clean help
 
 Binary="xspider"
 
@@ -33,7 +33,7 @@ build_darwin_arm64:
 run:
 	go run ./ $(ARGS)
 
-test:
+run_tests:
 	go test -v ./...
 
 gotool:
@@ -46,7 +46,7 @@ clean:
 help:
 	@echo "make - 格式化 Go 代码, 并编译生成二进制文件"
 	@echo "make build - 编译 Go 代码, 生成二进制文件"
-	@echo "make test - 直接运行单元测试代码"
+	@echo "make run_tests - 直接运行单元测试代码"
 	@echo "make run ARGS='-url https://www.apple.com/ -out apple.csv' - 直接运行 Go 代码并传递参数"
 	@echo "make clean - 移除二进制文件和 vim swap files"
 	@echo "make gotool - 运行 Go 工具 'fmt' and 'vet'"
