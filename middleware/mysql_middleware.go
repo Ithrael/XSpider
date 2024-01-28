@@ -52,8 +52,6 @@ func (m *MySQLMiddleware) Process(data interface{}) error {
 	}
 
 	for detail := range detailsCh {
-		fmt.Println(detail.Title)
-		// 将上面的参数插入到数据库中
 		_, err := mySQLDBInstance.DB.Exec("INSERT INTO websites (url, title, host, code, finger, timestamp) VALUES (?, ?, ?, ?, ?, ?)",
 			detail.Url, detail.Title, detail.Host, detail.ResponseCode, detail.Fingerprint, detail.Timestamp)
 		if err != nil {
