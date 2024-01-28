@@ -5,7 +5,6 @@ import (
 	"encoding/csv"
 	"errors"
 	"fmt"
-	"log"
 	"os"
 	"sync"
 )
@@ -38,9 +37,7 @@ func GetCsvInstance() *CSVMiddleware {
 	return csvInstance
 }
 
-// Init 初始化 CSV 中间件。
 func (c *CSVMiddleware) Init() error {
-	csvInstance = GetCsvInstance()
 	return nil
 }
 
@@ -52,24 +49,24 @@ func (c *CSVMiddleware) Process(data interface{}) error {
 	}
 
 	for detail := range detailsCh {
-		err := c.writer.Write([]string{
+		record := []string{
 			detail.Url,
 			detail.Title,
 			detail.Host,
 			fmt.Sprint(detail.ResponseCode),
 			detail.Fingerprint,
 			detail.Timestamp,
-		})
-		if err != nil {
-			log.Printf("Failed to write data to CSV: %v", err)
 		}
+		if err := c.writer.Write(record); err != nil {
+			return fmt.Errorf("failed to write data to CSV: %v", err)
+		}
+		c.writer.Flush()
 	}
-	return fmt.Errorf("unexpected data type, expected []string")
+	return nil
 }
 
 // Close 关闭 CSV 中间件使用的任何资源。
 func (c *CSVMiddleware) Close() error {
-	c.writer.Flush()
 	if err := c.writer.Error(); err != nil {
 		return fmt.Errorf("failed to flush CSV writer: %v", err)
 	}
