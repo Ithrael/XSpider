@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"log"
 	"os"
 	"sync"
 
@@ -26,7 +27,7 @@ func GetMySQLDBInstance() *MySQLMiddleware {
 		mySQLDBInstance = &MySQLMiddleware{}
 		// 使用sync.Once确保初始化只执行一次
 		mySQLDBInstance.Once.Do(func() {
-			fmt.Println("test: ", os.Getenv("MYSQL_URL"))
+			log.Println("MYSQL_URL: ", os.Getenv("MYSQL_URL"))
 			// 在这里初始化MySQL连接池
 			db, err := sql.Open("mysql", os.Getenv("MYSQL_URL"))
 			if err != nil {
@@ -40,7 +41,6 @@ func GetMySQLDBInstance() *MySQLMiddleware {
 
 // Init 初始化 MySQLMiddleware。
 func (m *MySQLMiddleware) Init() error {
-	mySQLDBInstance = GetMySQLDBInstance()
 	return nil
 }
 
@@ -58,11 +58,15 @@ func (m *MySQLMiddleware) Process(data interface{}) error {
 			return fmt.Errorf("failed to insert data into MySQL: %v", err)
 		}
 	}
-	return fmt.Errorf("unexpected data type, expected []string")
+	return nil
 }
 
 // Close 关闭MySQLMiddleware使用的任何资源。
 func (m *MySQLMiddleware) Close() error {
-	// 关闭MySQL连接等。
+	if m.DB != nil {
+		if err := m.DB.Close(); err != nil {
+			return fmt.Errorf("failed to close MySQL connection: %v", err)
+		}
+	}
 	return nil
 }
