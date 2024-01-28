@@ -65,7 +65,7 @@ func parseResp(resp *colly.Response, url string) (*PageDetail, error) {
 func runSpider(detailsCh chan *PageDetail) {
 	var count int
 	c := colly.NewCollector(
-		// colly.MaxDepth(config.Restriction.MaxDepth),
+		colly.MaxDepth(config.Restriction.MaxDepth),
 		colly.Debugger(&debug.LogDebugger{}),
 	)
 
@@ -88,31 +88,25 @@ func runSpider(detailsCh chan *PageDetail) {
 		host := r.URL.Host
 		path := r.URL.Path
 		queryKey := r.URL.RawQuery
-		fmt.Println(host)
-		fmt.Println(path)
-		fmt.Println(queryKey)
-		if !IsSubDomain(host, config.Restriction.AllowedDomains) {
+
+		if len(config.Restriction.AllowedDomains) != 0 && !IsSubDomain(host, config.Restriction.AllowedDomains) {
 			r.Abort()
 		}
-		if IsSubDomain(host, config.Restriction.ExcludedDomains) {
+		if len(config.Restriction.ExcludedDomains) != 0 && IsSubDomain(host, config.Restriction.ExcludedDomains) {
 			r.Abort()
 		}
-		// fmt.Println(3)
-		// if !IsMatch(path, config.Restriction.AllowedPaths) {
-		// 	r.Abort()
-		// }
-		// fmt.Println(4)
-		// if IsMatch(path, config.Restriction.ExcludedPaths) {
-		// 	r.Abort()
-		// }
-		// fmt.Println(5)
-		// if !IsMatch(queryKey, config.Restriction.AllowedQueryKey) {
-		// 	r.Abort()
-		// }
-		// fmt.Println(6)
-		// if IsMatch(queryKey, config.Restriction.ExcludedQueryKey) {
-		// 	r.Abort()
-		// }
+		if len(config.Restriction.AllowedPaths) != 0 && !IsRegexMatch(path, config.Restriction.AllowedPaths) {
+			r.Abort()
+		}
+		if len(config.Restriction.ExcludedPaths) != 0 && IsRegexMatch(path, config.Restriction.ExcludedPaths) {
+			r.Abort()
+		}
+		if len(config.Restriction.AllowedQueryKey) != 0 && !IsRegexMatch(queryKey, config.Restriction.AllowedQueryKey) {
+			r.Abort()
+		}
+		if len(config.Restriction.ExcludedQueryKey) != 0 && IsRegexMatch(queryKey, config.Restriction.ExcludedQueryKey) {
+			r.Abort()
+		}
 		log.Println("Visiting", r.URL)
 		count++
 		if len(config.Headers) > 0 {
