@@ -20,12 +20,6 @@ type Config struct {
 		Parallelism        int      `mapstructure:"Parallelism"`
 		RandomDelayMaxTime int      `mapstructure:"RandomDelayMaxTime"`
 	} `mapstructure:"Restriction"`
-	Out struct {
-		Mysql struct {
-			Enable bool   `mapstructure:"Enable"`
-			Url    string `mapstructure:"Url"`
-		} `mapstructure:"Mysql"`
-	}
 }
 
 // Function to load the configuration from the YAML file

@@ -40,16 +40,6 @@ func TestLoadConfig(t *testing.T) {
 	if !equalSlice(config.Restriction.AllowedDomains, expectedAllowedDomains) {
 		t.Fatalf("Expected AllowedDomains to be %v, got %v", expectedAllowedDomains, config.Restriction.AllowedDomains)
 	}
-
-	// 验证Out字段
-	if config.Out.Mysql.Enable {
-		t.Fatalf("Expected Mysql Enable to be false, got true")
-	}
-
-	expectedMysqlUrl := "test_username:test_password@tcp(test_dbhost:3306)/test_dbname"
-	if config.Out.Mysql.Url != expectedMysqlUrl {
-		t.Fatalf("Expected Mysql Url to be %s, got %s", expectedMysqlUrl, config.Out.Mysql.Url)
-	}
 }
 
 // 比较两个字符串切片是否相等

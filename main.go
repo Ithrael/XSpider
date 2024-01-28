@@ -5,31 +5,23 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"net/url"
 	"os"
 	"strings"
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/gocolly/colly"
-	"github.com/gocolly/colly/debug"
+	"github.com/ithrael/WebScan/middleware"
 )
 
-type PageDetail struct {
-	Url          string
-	Title        string
-	HTML         string
-	ResponseCode int
-	Fingerprint  string
-}
-
 var visitURL string
-var out string
+
 var config *Config
 var configFile string
 
 func initConfig() {
 	flag.StringVar(&visitURL, "url", "https://www.baidu.com", "URL to visit")
-	flag.StringVar(&out, "out", "out.csv", "out file name")
 	flag.StringVar(&configFile, "config", "./config.yaml", "config file path")
 	flag.Parse()
 
@@ -39,7 +31,7 @@ func initConfig() {
 	}
 }
 
-func parseResp(resp *colly.Response, url string) (*PageDetail, error) {
+func parseResp(resp *colly.Response, url *url.URL) (*middleware.PageDetail, error) {
 	html := string(resp.Body)
 
 	doc, err := goquery.NewDocumentFromReader(strings.NewReader(html))
@@ -52,21 +44,24 @@ func parseResp(resp *colly.Response, url string) (*PageDetail, error) {
 	h := md5.New()
 	h.Write([]byte(html))
 	fingerprint := fmt.Sprintf("%x", h.Sum(nil))
-
-	return &PageDetail{
-		Url:          url,
+	currentTime := time.Now()
+	// 格式化为 "2006-01-02 15:04:05" 格式
+	formattedTime := currentTime.Format("2006-01-02 15:04:05")
+	return &middleware.PageDetail{
+		Url:          url.String(),
+		Host:         url.Host,
 		Title:        title,
 		HTML:         html,
 		ResponseCode: resp.StatusCode,
 		Fingerprint:  fingerprint,
+		Timestamp:    formattedTime,
 	}, nil
 }
 
-func runSpider(detailsCh chan *PageDetail) {
+func runSpider(detailsCh chan *middleware.PageDetail) {
 	var count int
 	c := colly.NewCollector(
 		colly.MaxDepth(config.Restriction.MaxDepth),
-		colly.Debugger(&debug.LogDebugger{}),
 	)
 
 	if config.Restriction.Parallelism != 0 {
@@ -117,7 +112,7 @@ func runSpider(detailsCh chan *PageDetail) {
 	})
 
 	c.OnResponse(func(r *colly.Response) {
-		pageDetail, err := parseResp(r, r.Request.URL.String())
+		pageDetail, err := parseResp(r, r.Request.URL)
 		if err != nil {
 			log.Printf("Failed to parse response: %v", err)
 			return
@@ -133,7 +128,12 @@ func runSpider(detailsCh chan *PageDetail) {
 
 func main() {
 	initConfig()
-	detailsCh := make(chan *PageDetail)
-	go WriteDetailsToCSV(detailsCh)
+	detailsCh := make(chan *middleware.PageDetail)
+	// 将数据写入到csv文件(output.csv)中
+	go middleware.GetCsvInstance().Process(detailsCh)
+	// 将数据写入到mysql中, export MysqlUrl="xxxx"
+	if os.Getenv("MYSQL_ENABLE") == "True" {
+		go middleware.GetMySQLDBInstance().Process(detailsCh)
+	}
 	runSpider(detailsCh)
 }
