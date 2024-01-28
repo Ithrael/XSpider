@@ -1,6 +1,7 @@
 package main
 
 import (
+	"reflect"
 	"testing"
 )
 
@@ -91,5 +92,19 @@ func TestIsSubDomain(t *testing.T) {
 				t.Errorf("IsSubDomain() = %v, want %v", got, tt.want)
 			}
 		})
+	}
+}
+
+func TestReadUrlsFromFile(t *testing.T) {
+	testFilePath := "./test/test_urls.txt"
+	expected := []string{"https://www.apple.com", "https://support.apple.com", "https://music.apple.com"}
+
+	result, err := ReadUrlsFromFile(testFilePath)
+	if err != nil {
+		t.Fatalf("Read File error: %v", err)
+	}
+
+	if !reflect.DeepEqual(result, expected) {
+		t.Errorf("expected %v，got %v", expected, result)
 	}
 }

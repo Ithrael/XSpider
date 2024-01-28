@@ -16,12 +16,15 @@ import (
 )
 
 var visitURL string
+var visitFile string
+var visitURLs []string
 
 var config *Config
 var configFile string
 
 func initConfig() {
-	flag.StringVar(&visitURL, "url", "https://www.baidu.com", "URL to visit")
+	flag.StringVar(&visitURL, "url", "", "URL to visit (Ps: https://www.apple.com/)")
+	flag.StringVar(&visitFile, "file", "", "URL files to visit (Ps: file.txt)")
 	flag.StringVar(&configFile, "config", "./config.yaml", "config file path")
 	flag.Parse()
 
@@ -84,18 +87,21 @@ func runSpider(detailsCh chan *middleware.PageDetail) {
 		path := r.URL.Path
 		queryKey := r.URL.RawQuery
 
+		// 匹配host
 		if len(config.Restriction.AllowedDomains) != 0 && !IsSubDomain(host, config.Restriction.AllowedDomains) {
 			r.Abort()
 		}
 		if len(config.Restriction.ExcludedDomains) != 0 && IsSubDomain(host, config.Restriction.ExcludedDomains) {
 			r.Abort()
 		}
+		// 匹配path
 		if len(config.Restriction.AllowedPaths) != 0 && !IsRegexMatch(path, config.Restriction.AllowedPaths) {
 			r.Abort()
 		}
 		if len(config.Restriction.ExcludedPaths) != 0 && IsRegexMatch(path, config.Restriction.ExcludedPaths) {
 			r.Abort()
 		}
+		// 匹配querykey
 		if len(config.Restriction.AllowedQueryKey) != 0 && !IsRegexMatch(queryKey, config.Restriction.AllowedQueryKey) {
 			r.Abort()
 		}
@@ -120,8 +126,26 @@ func runSpider(detailsCh chan *middleware.PageDetail) {
 
 		detailsCh <- pageDetail
 	})
-	if err := c.Visit(visitURL); err != nil {
-		log.Fatalf("Visit URL failed: %v", err)
+
+	if visitURL != "" {
+		visitURLs = append(visitURLs, visitURL)
+	}
+
+	if visitFile != "" {
+		urlsFromFile, err := ReadUrlsFromFile(visitFile)
+		if err != nil {
+			log.Printf("ReadUrlsFromFile Error: %v", err)
+			return
+		}
+
+		visitURLs = append(visitURLs, urlsFromFile...)
+	}
+
+	for _, url := range visitURLs {
+		err := c.Visit(url)
+		if err != nil {
+			log.Printf("Error visiting URL %s: %v", url, err)
+		}
 	}
 	close(detailsCh)
 }

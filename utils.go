@@ -1,6 +1,9 @@
 package main
 
 import (
+	"bufio"
+	"fmt"
+	"os"
 	"regexp"
 	"strings"
 )
@@ -25,4 +28,30 @@ func IsSubDomain(domain string, targets []string) bool {
 		}
 	}
 	return false
+}
+
+func ReadUrlsFromFile(filename string) ([]string, error) {
+	// 定义一个切片来存储 URLs
+	var urls []string
+
+	// 打开文件
+	file, err := os.Open(filename)
+	if err != nil {
+		return nil, fmt.Errorf("无法打开文件: %v", err)
+	}
+	defer file.Close()
+
+	// 使用 bufio.Scanner 逐行读取文件内容
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		// 将每一行的内容添加到切片中
+		urls = append(urls, scanner.Text())
+	}
+
+	// 检查是否有读取文件时出现的错误
+	if err := scanner.Err(); err != nil {
+		return nil, fmt.Errorf("读取文件时出现错误: %v", err)
+	}
+
+	return urls, nil
 }
