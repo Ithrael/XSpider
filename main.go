@@ -68,7 +68,10 @@ func runSpider(detailsCh chan *middleware.PageDetail) {
 	)
 
 	if config.Restriction.Parallelism != 0 {
-		c.Limit(&colly.LimitRule{Parallelism: config.Restriction.Parallelism, RandomDelay: time.Duration(config.Restriction.RandomDelayMaxTime) * time.Second})
+		c.Limit(&colly.LimitRule{
+			Parallelism: config.Restriction.Parallelism,
+			RandomDelay: time.Duration(config.Restriction.RandomDelayMaxTime) * time.Second,
+		})
 	}
 
 	c.OnHTML("a[href]", func(e *colly.HTMLElement) {
@@ -77,10 +80,9 @@ func runSpider(detailsCh chan *middleware.PageDetail) {
 
 	c.OnRequest(func(r *colly.Request) {
 		if config.Restriction.MaxCount != 0 {
-			if count > config.Restriction.MaxCount {
-				log.Println("Reached max count!")
-				r.Abort()  // 如果超过最大数量，则取消请求
-				os.Exit(1) // 并退出程序
+			if count >= config.Restriction.MaxCount {
+				r.Abort() // 如果超过最大数量，则取消请求
+				log.Fatal("Reached max count!")
 			}
 		}
 		host := r.URL.Host
@@ -120,10 +122,9 @@ func runSpider(detailsCh chan *middleware.PageDetail) {
 	c.OnResponse(func(r *colly.Response) {
 		pageDetail, err := parseResp(r, r.Request.URL)
 		if err != nil {
-			log.Printf("Failed to parse response: %v", err)
+			log.Fatal("Failed to parse response: %v", err)
 			return
 		}
-
 		detailsCh <- pageDetail
 	})
 
@@ -134,7 +135,7 @@ func runSpider(detailsCh chan *middleware.PageDetail) {
 	if visitFile != "" {
 		urlsFromFile, err := ReadUrlsFromFile(visitFile)
 		if err != nil {
-			log.Printf("ReadUrlsFromFile Error: %v", err)
+			log.Fatal("ReadUrlsFromFile Error: %v", err)
 			return
 		}
 
@@ -152,13 +153,15 @@ func runSpider(detailsCh chan *middleware.PageDetail) {
 
 func main() {
 	initConfig()
-	ClearScreen()
 	ShowLogo()
+
 	detailsCh := make(chan *middleware.PageDetail)
 	// 将数据写入到csv文件(output.csv)中
+	defer middleware.GetCsvInstance().Close()
 	go middleware.GetCsvInstance().Process(detailsCh)
 	// 将数据写入到mysql中, export MysqlUrl="xxxx"
 	if os.Getenv("MYSQL_ENABLE") == "True" {
+		defer middleware.GetMySQLDBInstance().Close()
 		go middleware.GetMySQLDBInstance().Process(detailsCh)
 	}
 	runSpider(detailsCh)
