@@ -1,0 +1,38 @@
+name: release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 1.Check out git repository
+        uses: actions/checkout@v2
+
+      - name: 2.配置go环境
+        uses: actions/setup-go@v2
+        with:
+          go-version: "1.21.5"
+
+      - name: 3.单元测试
+        run: make run_tests
+
+      - name: 4.创建artifacts
+        run: mkdir -p artifacts
+
+      - name: 5.build
+        run: make build_all
+
+      - name: 6.upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          path: dist_electron
+
+      - name: 7.release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: "artifacts/**"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
